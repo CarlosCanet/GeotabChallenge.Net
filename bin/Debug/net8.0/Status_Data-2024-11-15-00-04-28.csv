@@ -1,5 +1,0 @@
-sVehicle Name,sVehicle Serial Number,sVIN,sDate,sDiagnostic Name,iDiagnostic Code,sSource Name,dValue,sUnits
-Demo - 19,G90000000019,3ALACXFC0JD000000,15/11/2024 00:04:26,Engine speed,107,Engine.SourceGo,725,Engine.UnitOfMeasureRevolutionsPerMinute
-Demo - 19,G90000000019,3ALACXFC0JD000000,15/11/2024 00:04:27,Engine road speed,2185,Engine.SourceGo,2,Engine.UnitOfMeasureKilometersPerHour
-Demo - 19,G90000000019,3ALACXFC0JD000000,15/11/2024 00:04:27,Total fuel used (since telematics device install),2187,Engine.SourceGo,18650,52,Engine.UnitOfMeasureLiters
-Demo - 19,G90000000019,3ALACXFC0JD000000,15/11/2024 00:04:27,Gear position (negative #s = reverse gears / positive #s = forward gears / 0 = neutral / 126 = park / 127 = drive / 129 = intermediate),8,Engine.SourceGo,1,Engine.UnitOfMeasureNone

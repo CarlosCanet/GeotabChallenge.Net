@@ -64,7 +64,11 @@ namespace GeotabChallengeCC
                     repopulateCaches = DateTime.UtcNow.AddHours(RepopulatePeroid);
                 }
                 FeedResult<LogRecord> feedLogRecordData = await MakeFeedCallAsync<LogRecord>(feedParams.LastGpsDataToken);
-                FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken);
+                // FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken);
+                StatusDataSearch statusDataSearch = new() {
+                    DiagnosticSearch = new DiagnosticSearch(KnownId.DiagnosticOdometerId)
+                };
+                FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken, statusDataSearch);
                 feedParams.LastGpsDataToken = feedLogRecordData.ToVersion;
                 foreach (LogRecord log in feedLogRecordData.Data)
                 {
@@ -322,6 +326,9 @@ namespace GeotabChallengeCC
 
         async Task<FeedResult<T>> MakeFeedCallAsync<T>(long? fromVersion)
             where T : Entity => await api.CallAsync<FeedResult<T>>("GetFeed", typeof(T), new { fromVersion });
+
+        async Task<FeedResult<T>> MakeFeedCallAsync<T>(long? fromVersion, Search feedSearch)
+            where T : Entity => await api.CallAsync<FeedResult<T>>("GetFeed", typeof(T), new { fromVersion, search = feedSearch});
 
         async Task PopulateCachesAsync()
         {

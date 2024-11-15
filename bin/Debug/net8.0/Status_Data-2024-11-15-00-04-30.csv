@@ -1,3 +1,0 @@
-sVehicle Name,sVehicle Serial Number,sVIN,sDate,sDiagnostic Name,iDiagnostic Code,sSource Name,dValue,sUnits
-Demo - 31,G90000000031,3HAEKTAT0LL000000,15/11/2024 00:04:29,Generic AFT regen inhibit status (1 = on),2990,Engine.SourceGo,1,Engine.UnitOfMeasureNone
-Demo - 19,G90000000019,3ALACXFC0JD000000,15/11/2024 00:04:29,Raw outside air temperature,2092,Engine.SourceGo,23,Engine.UnitOfMeasureDegreesCelsius
