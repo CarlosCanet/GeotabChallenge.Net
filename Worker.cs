@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using System;
 using Thread = System.Threading.Thread;
 
-namespace Geotab.SDK.DataFeed
+namespace GeotabChallengeCC
 {
     /// <summary>
     /// Worker base class
@@ -31,9 +31,9 @@ namespace Geotab.SDK.DataFeed
         {
             
             // Optionally we can output to csv or google doc:
-            new FeedToCsv(path, results.GpsRecords, results.StatusData, results.FaultData, results.Trips, results.ExceptionEvents).Run();
+            new FeedToCsv(path, results.GpsRecords, results.StatusData).Run();
             // Displays feed to console
-            new FeedToConsole(results.GpsRecords,results.StatusData,results.FaultData).Run();
+            new FeedToConsole(results.GpsRecords,results.StatusData).Run();
                         
             await Task.Delay(1000);
         }

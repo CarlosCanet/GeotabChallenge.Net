@@ -15,7 +15,7 @@ using System.Threading.Tasks;
  ***************************************************************/
 
 
-namespace Geotab.SDK.DataFeed
+namespace GeotabChallengeCC
 {
     /// <summary>
     /// Main program
@@ -60,20 +60,15 @@ namespace Geotab.SDK.DataFeed
                                 long? gpsToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--st");
                                 long? statusToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
-                                index = arguments.IndexOf("--ft");
-                                long? faultToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
-                                index = arguments.IndexOf("--tt");
-                                long? tripToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
-                                index = arguments.IndexOf("--et");
-                                long? exceptionToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 index = arguments.IndexOf("--f");
                                 string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Environment.CurrentDirectory;
                                 bool continuous = arguments.IndexOf("--c") >= 0;
                                 bool federation = string.IsNullOrEmpty(database);
-                                Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, faultToken, tripToken, exceptionToken, path);
+                                Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, path);
                                 var cancellationToken = new CancellationTokenSource();
                                 
                                 Task[] tasks = new Task[1];
+                                // tasks[0] = Task.Run(async () => await worker.DoWorkAsync(continuous));
                                 tasks[0] = Task.Run(async () => await worker.DoWorkAsync(continuous));
 
                                 Task.WaitAll(tasks);
@@ -81,6 +76,7 @@ namespace Geotab.SDK.DataFeed
                                 if (continuous && Console.ReadLine() != null)
                                 {
                                     // This task should run async
+                                    // Func<Task> function = async () => await worker.DoWorkAsync(continuous);
                                     Func<Task> function = async () => await worker.DoWorkAsync(continuous);
                                     Task task = Task.Run(function, cancellationToken.Token);
                                 }

@@ -9,7 +9,7 @@ using Geotab.Checkmate.ObjectModel.Exceptions;
 using Exception = System.Exception;
 using Thread = System.Threading.Thread;
 
-namespace Geotab.SDK.DataFeed
+namespace GeotabChallengeCC
 {
     /// <summary>
     /// An class that queries Geotab's servers for vehicle data.
@@ -55,7 +55,7 @@ namespace Geotab.SDK.DataFeed
         /// <returns><see cref="FeedResultData"/></returns>
         public async Task<FeedResultData> GetAsync(FeedParameters feedParams)
         {
-            FeedResultData feedResults = new FeedResultData(new List<LogRecord>(), new List<StatusData>(), new List<FaultData>(), new List<Trip>(), new List<ExceptionEvent>());
+            FeedResultData feedResults = new FeedResultData(new List<LogRecord>(), new List<StatusData>());
             try
             {
                 if (DateTime.UtcNow > repopulateCaches)
@@ -65,9 +65,6 @@ namespace Geotab.SDK.DataFeed
                 }
                 FeedResult<LogRecord> feedLogRecordData = await MakeFeedCallAsync<LogRecord>(feedParams.LastGpsDataToken);
                 FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken);
-                FeedResult<FaultData> feedFaultData = await MakeFeedCallAsync<FaultData>(feedParams.LastFaultDataToken);
-                FeedResult<Trip> feedTripData = await MakeFeedCallAsync<Trip>(feedParams.LastTripToken);
-                FeedResult<ExceptionEvent> feedExceptionData = await MakeFeedCallAsync<ExceptionEvent>(feedParams.LastExceptionToken);
                 feedParams.LastGpsDataToken = feedLogRecordData.ToVersion;
                 foreach (LogRecord log in feedLogRecordData.Data)
                 {
@@ -82,32 +79,6 @@ namespace Geotab.SDK.DataFeed
                     log.Device = await GetDeviceAsync(log.Device);
                     log.Diagnostic = await GetDiagnosticAsync(log.Diagnostic);
                     feedResults.StatusData.Add(log);
-                }
-                feedParams.LastFaultDataToken = feedFaultData.ToVersion;
-                foreach (FaultData log in feedFaultData.Data)
-                {
-                    // Populate relevant FaultData fields.
-                    log.Device = await GetDeviceAsync(log.Device);
-                    log.Diagnostic = await GetDiagnosticAsync(log.Diagnostic);
-                    log.Controller = await GetControllerAsync(log.Controller);
-                    log.FailureMode = await GetFailureModeAsync(log.FailureMode);
-                    feedResults.FaultData.Add(log);
-                }
-                feedParams.LastTripToken = feedTripData.ToVersion;
-                foreach (Trip trip in feedTripData.Data)
-                {
-                    trip.Device = await GetDeviceAsync(trip.Device);
-                    trip.Driver = await GetDriver(trip.Driver);
-                    feedResults.Trips.Add(trip);
-                }
-                feedParams.LastExceptionToken = feedExceptionData.ToVersion;
-                foreach (ExceptionEvent exceptionEvent in feedExceptionData.Data)
-                {
-                    exceptionEvent.Device = await GetDeviceAsync(exceptionEvent.Device);
-                    exceptionEvent.Driver = await GetDriver(exceptionEvent.Driver);
-                    exceptionEvent.Diagnostic = await GetDiagnosticAsync(exceptionEvent.Diagnostic);
-                    exceptionEvent.Rule = await GetRuleAsync(exceptionEvent.Rule);
-                    feedResults.ExceptionEvents.Add(exceptionEvent);
                 }
             }
             catch (Exception e)

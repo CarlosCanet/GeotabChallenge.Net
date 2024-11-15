@@ -8,7 +8,7 @@ using Geotab.Checkmate.ObjectModel.Engine;
 using Geotab.Checkmate.ObjectModel.Exceptions;
 using Exception = System.Exception;
 
-namespace Geotab.SDK.DataFeed
+namespace GeotabChallengeCC
 {
     /// <summary>
     /// A feed that produces csv data
@@ -16,26 +16,6 @@ namespace Geotab.SDK.DataFeed
     /// </summary>
     class FeedToCsv
     {
-        /// <summary>
-        /// The exception event header
-        /// </summary>
-        public const string ExceptionEventHeader = "sId,sVehicle Name,sVehicle Serial Number,sVIN,sDiagnostic Name,iDiagnostic Code,sSource Name,sDriver Name,sDriver Keys,sRule Name,sActive From,sActive To";
-
-        /// <summary>
-        /// The file prefix for exception data
-        /// </summary>
-        public const string ExceptionEventPrefix = "Exception_Events";
-
-        /// <summary>
-        /// The fault data header
-        /// </summary>
-        public const string FaultDataHeader = "sVehicle Name,sVehicle Serial Number,sVIN,sDate,sDiagnostic Name,sFailure Mode Name,iFailure Mode Code,sFailure Mode Source,sController Name,iCount,sActive,bMalfunction Lamp,bRed Stop Lamp,bAmber Warning Lamp,bProtect Lamp,sDismiss Date,sDismiss User";
-
-        /// <summary>
-        /// The file prefix for faults
-        /// </summary>
-        public const string FaultPrefix = "Fault_Data";
-
         /// <summary>
         /// The GPS data header
         /// </summary>
@@ -56,22 +36,9 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         public const string StatusPrefix = "Status_Data";
 
-        /// <summary>
-        /// The trip header
-        /// </summary>
-        public const string TripHeader = "sVehicleName,sVehicleSerialNumber,sVin,sDriver Name,sDriver Keys,sTrip Start Time,sTrip End Time,dTrip Distance";
-
-        /// <summary>
-        /// The file prefix for trips
-        /// </summary>
-        public const string TripPrefix = "Trips";
-
-        readonly IList<ExceptionEvent> exceptionEvents;
-        readonly IList<FaultData> faultRecords;
         readonly IList<LogRecord> gpsRecords;
         readonly string path;
         readonly IList<StatusData> statusRecords;
-        readonly IList<Trip> trips;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedToCsv" /> class.
@@ -79,9 +46,6 @@ namespace Geotab.SDK.DataFeed
         /// <param name="path">The path.</param>
         /// <param name="gpsRecords">The GPS records.</param>
         /// <param name="statusRecords">The status records.</param>
-        /// <param name="faultRecords">The fault records.</param>
-        /// <param name="trips">The trips.</param>
-        /// <param name="exceptionEvents">The exception events.</param>
         public FeedToCsv(string path, IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null, IList<FaultData> faultRecords = null, IList<Trip> trips = null, IList<ExceptionEvent> exceptionEvents = null)
         {
             if (string.IsNullOrEmpty(path))
@@ -95,9 +59,6 @@ namespace Geotab.SDK.DataFeed
             }
             this.gpsRecords = gpsRecords ?? new List<LogRecord>();
             this.statusRecords = statusRecords ?? new List<StatusData>();
-            this.faultRecords = faultRecords ?? new List<FaultData>();
-            this.trips = trips ?? new List<Trip>();
-            this.exceptionEvents = exceptionEvents ?? new List<ExceptionEvent>();
         }
 
         /// <summary>
@@ -112,18 +73,6 @@ namespace Geotab.SDK.DataFeed
             if (statusRecords.Count > 0)
             {
                 WriteDataToCsv<StatusData>();
-            }
-            if (faultRecords.Count > 0)
-            {
-                WriteDataToCsv<FaultData>();
-            }
-            if (trips.Count > 0)
-            {
-                WriteDataToCsv<Trip>();
-            }
-            if (exceptionEvents.Count > 0)
-            {
-                WriteDataToCsv<ExceptionEvent>();
             }
         }
 
@@ -230,84 +179,6 @@ namespace Geotab.SDK.DataFeed
                                 {
                                     AppendName(sb, dataDiagnostic.UnitOfMeasure);
                                 }
-                            });
-                        }
-                    }
-                }
-                else if (type == typeof(FaultData))
-                {
-                    using (TextWriter writer = new StreamWriter(Path.Combine(path, MakeFileName(FaultPrefix)), true))
-                    {
-                        writer.WriteLine(FaultDataHeader);
-                        foreach (FaultData faultRecord in faultRecords)
-                        {
-                            Write(writer, faultRecord, (StringBuilder sb, FaultData faultData) =>
-                            {
-                                AppendDeviceValues(sb, faultData.Device);
-                                AppendValues(sb, faultData.DateTime);
-                                AppendName(sb, faultData.Diagnostic);
-                                FailureMode failureMode = faultData.FailureMode;
-                                AppendName(sb, failureMode);
-                                AppendValues(sb, failureMode.Code);
-                                if (failureMode is NoFailureMode)
-                                {
-                                    AppendValues(sb, "None");
-                                }
-                                else
-                                {
-                                    AppendName(sb, failureMode.Source);
-                                }
-                                AppendName(sb, faultData.Controller);
-                                AppendValues(sb, faultData.Count);
-                                AppendValues(sb, faultData.FaultState);
-                                AppendValues(sb, faultData.MalfunctionLamp);
-                                AppendValues(sb, faultData.RedStopLamp);
-                                AppendValues(sb, faultData.AmberWarningLamp);
-                                AppendValues(sb, faultData.ProtectWarningLamp);
-                                AppendValues(sb, faultData.DismissDateTime);
-                                User dismissUser = faultData.DismissUser;
-                                if (dismissUser != null)
-                                {
-                                    AppendValues(sb, faultData.DismissUser.Name.Replace(",", " "));
-                                }
-                            });
-                        }
-                    }
-                }
-                else if (type == typeof(Trip))
-                {
-                    using (TextWriter writer = new StreamWriter(Path.Combine(path, MakeFileName(TripPrefix)), true))
-                    {
-                        writer.WriteLine(TripHeader);
-                        foreach (Trip tripToWrite in trips)
-                        {
-                            Write(writer, tripToWrite, (StringBuilder sb, Trip trip) =>
-                            {
-                                AppendDeviceValues(sb, trip.Device);
-                                AppendDriverValues(sb, trip.Driver);
-                                AppendValues(sb, trip.Start);
-                                AppendValues(sb, trip.Stop);
-                                AppendValues(sb, trip.Distance);
-                            });
-                        }
-                    }
-                }
-                else if (type == typeof(ExceptionEvent))
-                {
-                    using (TextWriter writer = new StreamWriter(Path.Combine(path, MakeFileName(ExceptionEventPrefix)), true))
-                    {
-                        writer.WriteLine(ExceptionEventHeader);
-                        foreach (ExceptionEvent exceptionEventToWrite in exceptionEvents)
-                        {
-                            Write(writer, exceptionEventToWrite, (StringBuilder sb, ExceptionEvent exceptionEvent) =>
-                            {
-                                AppendValues(sb, exceptionEvent.Id);
-                                AppendDeviceValues(sb, exceptionEvent.Device);
-                                AppendDiagnosticValues(sb, exceptionEvent.Diagnostic);
-                                AppendDriverValues(sb, exceptionEvent.Driver);
-                                AppendName(sb, exceptionEvent.Rule);
-                                AppendValues(sb, exceptionEvent.ActiveFrom);
-                                AppendValues(sb, exceptionEvent.ActiveTo);
                             });
                         }
                     }

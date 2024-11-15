@@ -4,19 +4,17 @@ using System.Text;
 using Geotab.Checkmate.ObjectModel;
 using Geotab.Checkmate.ObjectModel.Engine;
 
-namespace Geotab.SDK.DataFeed
+namespace GeotabChallengeCC
 {
     /// <summary>
     /// An object that creates a feed to the console
     /// </summary>
     class FeedToConsole
     {
-        const string FaultDataHeader = "Vehicle Serial Number, Date, Diagnostic Name, Failure Mode Name, Failure Mode Source, Controller Name";
         const string GpsDataHeader = "Vehicle Serial Number, Date, Longitude, Latitude, Speed";
         const string StatusDataHeader = "Vehicle Serial Number, Date, Diagnostic Name, Source Name, Value, Units";
         static readonly char[] trimChars = { ' ', ',' };
         readonly IDictionary<Id, Device> deviceLookup = new Dictionary<Id, Device>();
-        readonly IList<FaultData> faultRecords;
         readonly IList<LogRecord> gpsRecords;
         readonly IList<StatusData> statusRecords;
 
@@ -25,15 +23,12 @@ namespace Geotab.SDK.DataFeed
         /// </summary>
         /// <param name="gpsRecords">The GPS records.</param>
         /// <param name="statusRecords">The status records.</param>
-        /// <param name="faultRecords">The fault records.</param>
-        public FeedToConsole(IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null, IList<FaultData> faultRecords = null)
+        public FeedToConsole(IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null)
         {
             this.gpsRecords = gpsRecords ?? new List<LogRecord>();
             this.statusRecords = statusRecords ?? new List<StatusData>();
-            this.faultRecords = faultRecords ?? new List<FaultData>();
             List<Device> devices = new List<Device>(SeparateByDevice(this.gpsRecords).Keys);
             devices.AddRange(SeparateByDevice(this.statusRecords).Keys);
-            devices.AddRange(SeparateByDevice(this.faultRecords).Keys);
             foreach (Device device in devices)
             {
                 deviceLookup[device.Id] = device;
@@ -107,14 +102,6 @@ namespace Geotab.SDK.DataFeed
             {
                 WriteData(statusRecords);
             }
-            if (faultRecords.Count > 0)
-            {
-                WriteData(faultRecords);
-            }
-            if ((faultRecords.Count == 0)&& (statusRecords.Count == 0) && (gpsRecords.Count == 0))
-            {
-                WriteError();
-            }
         }
 
         static void AppendName(StringBuilder sb, NameEntity entity)
@@ -187,26 +174,6 @@ namespace Geotab.SDK.DataFeed
             Console.WriteLine(sb.ToString().TrimEnd(trimChars));
         }
 
-        void Write(FaultData faultData)
-        {
-            StringBuilder sb = new StringBuilder();
-            AppendDeviceValues(sb, faultData.Device.Id);
-            AppendValues(sb, faultData.DateTime);
-            AppendName(sb, faultData.Diagnostic);
-            FailureMode failureMode = faultData.FailureMode;
-            AppendName(sb, failureMode);
-            if (failureMode is NoFailureMode)
-            {
-                AppendValues(sb, "None");
-            }
-            else
-            {
-                AppendName(sb, failureMode.Source);
-            }
-            AppendName(sb, faultData.Controller);
-            Console.WriteLine(sb.ToString().TrimEnd(trimChars));
-        }
-
         void WriteError(){
             Console.WriteLine("No data found");
         }
@@ -231,16 +198,6 @@ namespace Geotab.SDK.DataFeed
                 for (int i = 0; i < statusData.Count; i++)
                 {
                     Write(statusData[i]);
-                }
-                Console.WriteLine();
-            }
-            else if (type == typeof(FaultData))
-            {
-                IList<FaultData> faults = (IList<FaultData>)entities;
-                Console.WriteLine(FaultDataHeader);
-                for (int i = 0; i < faults.Count; i++)
-                {
-                    Write(faults[i]);
                 }
                 Console.WriteLine();
             }

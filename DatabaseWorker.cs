@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace Geotab.SDK.DataFeed
+namespace GeotabChallengeCC
 {
     /// <summary>
     /// Worker for a database
@@ -19,14 +19,11 @@ namespace Geotab.SDK.DataFeed
         /// <param name="server">The server.</param>
         /// <param name="gpsToken">The GPS token.</param>
         /// <param name="statusToken">The status token.</param>
-        /// <param name="faultToken">The fault token.</param>
-        /// <param name="tripToken">The trip token.</param>
-        /// <param name="exceptionToken">The exception token.</param>
         /// <param name="path">The path.</param>
-        public DatabaseWorker(string user, string password, string database, string server, long? gpsToken, long? statusToken, long? faultToken, long? tripToken, long? exceptionToken, string path)
+        public DatabaseWorker(string user, string password, string database, string server, long? gpsToken, long? statusToken, string path)
             : base(path)
         {
-            feedParameters = new FeedParameters(gpsToken, statusToken, faultToken, tripToken, exceptionToken);
+            feedParameters = new FeedParameters(gpsToken, statusToken);
             feedService = new FeedProcessor(server, database, user, password);
             
 
