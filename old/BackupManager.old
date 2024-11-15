@@ -2,19 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using System.Threading.Tasks;
+using Geotab.Checkmate;
 
 namespace BackupApplication
 {
     public class BackupManager
     {
-        private readonly GeotabApi api;
+        private readonly API api;
         private Dictionary<string, Vehicle> fleet = new Dictionary<string, Vehicle>();
         private string lastLogVersion, lastStatusVersion;
         private DateTime? startDate;
 
         public BackupManager()
         {
-            api = new GeotabApi(Auth.UserName, Auth.Password, Auth.Database, Auth.ServerPath);
+            api = new API(Auth.UserName, Auth.Password, null, Auth.Database);
             startDate = DateTime.UtcNow.AddHours(-Config.HOURS_TO_BACKUP);
         }
 

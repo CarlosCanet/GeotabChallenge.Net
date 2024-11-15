@@ -2,15 +2,15 @@
   "version": 3,
   "targets": {
     "net8.0": {
-      "Geotab.Checkmate.ObjectModel/11.43.302": {
+      "Geotab.Checkmate.ObjectModel/11.7.179": {
         "type": "package",
         "dependencies": {
           "System.Collections.Immutable": "8.0.0",
-          "System.Formats.Asn1": "8.0.1",
+          "System.Formats.Asn1": "8.0.0",
           "System.IO.FileSystem.AccessControl": "5.0.0",
           "System.Linq.Async": "6.0.1",
           "System.Reflection.Emit.Lightweight": "4.7.0",
-          "System.Text.Json": "8.0.5"
+          "System.Text.Json": "8.0.0"
         },
         "compile": {
           "lib/net8.0/Geotab.Checkmate.ObjectModel.dll": {
@@ -61,7 +61,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Formats.Asn1/8.0.1": {
+      "System.Formats.Asn1/8.0.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/System.Formats.Asn1.dll": {
@@ -171,8 +171,33 @@
           }
         }
       },
-      "System.Text.Json/8.0.5": {
+      "System.Text.Encodings.Web/8.0.0": {
         "type": "package",
+        "compile": {
+          "lib/net8.0/System.Text.Encodings.Web.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.Text.Encodings.Web.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll": {
+            "assetType": "runtime",
+            "rid": "browser"
+          }
+        }
+      },
+      "System.Text.Json/8.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Text.Encodings.Web": "8.0.0"
+        },
         "compile": {
           "lib/net8.0/System.Text.Json.dll": {
             "related": ".xml"
@@ -190,16 +215,16 @@
     }
   },
   "libraries": {
-    "Geotab.Checkmate.ObjectModel/11.43.302": {
-      "sha512": "GUJZ1B2MiZ6PWfANus8P3nNUL16JnR8vO7VFnkCH+GZCZAOaOrqx++8e7vw8TdlSnj7fwVdM1rhOGB9OnTVYqg==",
+    "Geotab.Checkmate.ObjectModel/11.7.179": {
+      "sha512": "YLj44Fn96On8e8LdQgIABT/fpUPl+AsfaKXZIVc2JnO0/OtIGnX499oehJsS8qYrRBgujQo7QBOAEq6oiBVVsw==",
       "type": "package",
-      "path": "geotab.checkmate.objectmodel/11.43.302",
+      "path": "geotab.checkmate.objectmodel/11.7.179",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "README.nuget.md",
         "eula.md",
-        "geotab.checkmate.objectmodel.11.43.302.nupkg.sha512",
+        "geotab.checkmate.objectmodel.11.7.179.nupkg.sha512",
         "geotab.checkmate.objectmodel.nuspec",
         "lib/net6.0/Geotab.Checkmate.ObjectModel.dll",
         "lib/net6.0/Geotab.Checkmate.ObjectModel.xml",
@@ -282,10 +307,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Formats.Asn1/8.0.1": {
-      "sha512": "XqKba7Mm/koKSjKMfW82olQdmfbI5yqeoLV/tidRp7fbh5rmHAQ5raDI/7SU0swTzv+jgqtUGkzmFxuUg0it1A==",
+    "System.Formats.Asn1/8.0.0": {
+      "sha512": "AJukBuLoe3QeAF+mfaRKQb2dgyrvt340iMBHYv+VdBzCUM06IxGlvl0o/uPOS7lHnXPN6u8fFRHSHudx5aTi8w==",
       "type": "package",
-      "path": "system.formats.asn1/8.0.1",
+      "path": "system.formats.asn1/8.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -306,7 +331,7 @@
         "lib/net8.0/System.Formats.Asn1.xml",
         "lib/netstandard2.0/System.Formats.Asn1.dll",
         "lib/netstandard2.0/System.Formats.Asn1.xml",
-        "system.formats.asn1.8.0.1.nupkg.sha512",
+        "system.formats.asn1.8.0.0.nupkg.sha512",
         "system.formats.asn1.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -543,10 +568,45 @@
         "version.txt"
       ]
     },
-    "System.Text.Json/8.0.5": {
-      "sha512": "0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg==",
+    "System.Text.Encodings.Web/8.0.0": {
+      "sha512": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ==",
       "type": "package",
-      "path": "system.text.json/8.0.5",
+      "path": "system.text.encodings.web/8.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.Text.Encodings.Web.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Text.Encodings.Web.targets",
+        "lib/net462/System.Text.Encodings.Web.dll",
+        "lib/net462/System.Text.Encodings.Web.xml",
+        "lib/net6.0/System.Text.Encodings.Web.dll",
+        "lib/net6.0/System.Text.Encodings.Web.xml",
+        "lib/net7.0/System.Text.Encodings.Web.dll",
+        "lib/net7.0/System.Text.Encodings.Web.xml",
+        "lib/net8.0/System.Text.Encodings.Web.dll",
+        "lib/net8.0/System.Text.Encodings.Web.xml",
+        "lib/netstandard2.0/System.Text.Encodings.Web.dll",
+        "lib/netstandard2.0/System.Text.Encodings.Web.xml",
+        "runtimes/browser/lib/net6.0/System.Text.Encodings.Web.dll",
+        "runtimes/browser/lib/net6.0/System.Text.Encodings.Web.xml",
+        "runtimes/browser/lib/net7.0/System.Text.Encodings.Web.dll",
+        "runtimes/browser/lib/net7.0/System.Text.Encodings.Web.xml",
+        "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll",
+        "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.xml",
+        "system.text.encodings.web.8.0.0.nupkg.sha512",
+        "system.text.encodings.web.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.Text.Json/8.0.0": {
+      "sha512": "OdrZO2WjkiEG6ajEFRABTRCi/wuXQPxeV6g8xvUJqdxMvvuCCEk86zPla8UiIQJz3durtUEbNyY/3lIhS0yZvQ==",
+      "type": "package",
+      "path": "system.text.json/8.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -611,7 +671,7 @@
         "lib/net8.0/System.Text.Json.xml",
         "lib/netstandard2.0/System.Text.Json.dll",
         "lib/netstandard2.0/System.Text.Json.xml",
-        "system.text.json.8.0.5.nupkg.sha512",
+        "system.text.json.8.0.0.nupkg.sha512",
         "system.text.json.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -619,7 +679,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "Geotab.Checkmate.ObjectModel >= 11.43.302"
+      "Geotab.Checkmate.ObjectModel >= 11.7.179"
     ]
   },
   "packageFolders": {
@@ -628,9 +688,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\geotabChallenge.Net.csproj",
-      "projectName": "geotabChallenge.Net",
-      "projectPath": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\geotabChallenge.Net.csproj",
+      "projectUniqueName": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\GeotabChallenge.net.csproj",
+      "projectName": "DataFeed",
+      "projectPath": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\GeotabChallenge.net.csproj",
       "packagesPath": "C:\\Users\\carlo\\.nuget\\packages\\",
       "outputPath": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\obj\\",
       "projectStyle": "PackageReference",
@@ -650,9 +710,7 @@
         }
       },
       "warningProperties": {
-        "warnAsError": [
-          "NU1605"
-        ]
+        "allWarningsAsErrors": true
       },
       "restoreAuditProperties": {
         "enableAudit": "true",
@@ -666,7 +724,7 @@
         "dependencies": {
           "Geotab.Checkmate.ObjectModel": {
             "target": "Package",
-            "version": "[11.43.302, )"
+            "version": "[11.7.179, )"
           }
         },
         "imports": [

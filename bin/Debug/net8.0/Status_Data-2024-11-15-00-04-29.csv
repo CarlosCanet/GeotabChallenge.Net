@@ -1,0 +1,2 @@
+sVehicle Name,sVehicle Serial Number,sVIN,sDate,sDiagnostic Name,iDiagnostic Code,sSource Name,dValue,sUnits
+Demo - 19,G90000000019,3ALACXFC0JD000000,15/11/2024 00:04:28,Engine speed,107,Engine.SourceGo,1261,25,Engine.UnitOfMeasureRevolutionsPerMinute

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\geotabChallenge.Net.csproj": {}
+    "f:\\Desarrollo\\Geotab\\geotabChallenge.Net\\GeotabChallenge.net.csproj": {}
   },
   "projects": {
-    "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\geotabChallenge.Net.csproj": {
+    "f:\\Desarrollo\\Geotab\\geotabChallenge.Net\\GeotabChallenge.net.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\geotabChallenge.Net.csproj",
-        "projectName": "geotabChallenge.Net",
-        "projectPath": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\geotabChallenge.Net.csproj",
+        "projectUniqueName": "f:\\Desarrollo\\Geotab\\geotabChallenge.Net\\GeotabChallenge.net.csproj",
+        "projectName": "DataFeed",
+        "projectPath": "f:\\Desarrollo\\Geotab\\geotabChallenge.Net\\GeotabChallenge.net.csproj",
         "packagesPath": "C:\\Users\\carlo\\.nuget\\packages\\",
-        "outputPath": "F:\\Desarrollo\\Geotab\\geotabChallenge.Net\\obj\\",
+        "outputPath": "f:\\Desarrollo\\Geotab\\geotabChallenge.Net\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\carlo\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -29,9 +29,7 @@
           }
         },
         "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
+          "allWarningsAsErrors": true
         },
         "restoreAuditProperties": {
           "enableAudit": "true",
@@ -45,7 +43,7 @@
           "dependencies": {
             "Geotab.Checkmate.ObjectModel": {
               "target": "Package",
-              "version": "[11.43.302, )"
+              "version": "[11.7.179, )"
             }
           },
           "imports": [
