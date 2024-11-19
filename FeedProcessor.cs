@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
 using Geotab.Checkmate.ObjectModel;
@@ -84,6 +86,8 @@ namespace GeotabChallengeCC
                     log.Diagnostic = await GetDiagnosticAsync(log.Diagnostic);
                     feedResults.StatusData.Add(log);
                 }
+                var tokens = new { gpsToken = feedParams.LastGpsDataToken, statusToken = feedParams.LastStatusDataToken };
+                await File.WriteAllTextAsync(Program.CONFIG_FILE, JsonSerializer.Serialize(tokens, new JsonSerializerOptions { WriteIndented = true }));
             }
             catch (Exception e)
             {

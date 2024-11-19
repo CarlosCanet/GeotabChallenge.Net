@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Geotab.Checkmate.ObjectModel.Engine;
 
 /***************************************************************
  * DISCLAIMER: This code example is provided for demonstration *
@@ -22,6 +25,7 @@ namespace GeotabChallengeCC
     /// </summary>
     static class Program
     {
+        public readonly static string CONFIG_FILE = "config.json";
         /// <summary>
         /// This is a console example of obtaining the data feed from the server.
         /// 1) Process command line arguments: Server, Database, User, Password, Options, File Path and Continuous Feed option.
@@ -32,7 +36,7 @@ namespace GeotabChallengeCC
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project &gt; Properties &gt; Debug Tab &gt; Start Options: Command line arguments.</param>
         static void Main(string[] args)
         {
-            const string Command = "> dotnet run --s {0} --d {1} --u {2} --p {3} --gt {4} --st {5} --ft {6} --tt {7} --et {8} --f {9} --c";
+            const string Command = "> dotnet run --s {0} --d {1} --u {2} --p {3} --gt {4} --st {5} --f {9} --c";
             if (args.Length > 0)
             {
                 IList<string> arguments = new List<string>();
@@ -56,17 +60,24 @@ namespace GeotabChallengeCC
                             if (index >= 0 && index < args.Length - 1)
                             {
                                 string database = index >= 0 && index < args.Length - 1 ? args[index + 1] : null;
-                                index = arguments.IndexOf("--gt");
-                                long? gpsToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
-                                index = arguments.IndexOf("--st");
-                                long? statusToken = index >= 0 && index < args.Length - 1 ? (long?)long.Parse(args[index + 1], System.Globalization.NumberStyles.HexNumber) : null;
+                                int indexGT = arguments.IndexOf("--gt");
+                                long? gpsToken = indexGT >= 0 && indexGT < args.Length - 1 ? (long?)long.Parse(args[indexGT + 1], System.Globalization.NumberStyles.HexNumber) : null;
+                                int indexST = arguments.IndexOf("--st");
+                                long? statusToken = indexST >= 0 && indexST < args.Length - 1 ? (long?)long.Parse(args[indexST + 1], System.Globalization.NumberStyles.HexNumber) : null;
+                                if ((indexGT < 0 || indexST < 0) && File.Exists(CONFIG_FILE))
+                                {
+                                    string jsonContent = File.ReadAllText(CONFIG_FILE);
+                                    using JsonDocument document = JsonDocument.Parse(jsonContent);
+                                    JsonElement root = document.RootElement;
+                                    gpsToken = gpsToken ?? root.GetProperty("gpsToken").GetInt64();
+                                    statusToken = statusToken ?? root.GetProperty("statusToken").GetInt64();
+                                }
                                 index = arguments.IndexOf("--f");
                                 string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Environment.CurrentDirectory;
                                 bool continuous = arguments.IndexOf("--c") >= 0;
                                 bool federation = string.IsNullOrEmpty(database);
                                 Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, path);
                                 var cancellationToken = new CancellationTokenSource();
-                                
                                 Task[] tasks = new Task[1];
                                 // tasks[0] = Task.Run(async () => await worker.DoWorkAsync(continuous));
                                 tasks[0] = Task.Run(async () => await worker.DoWorkAsync(continuous));
@@ -87,7 +98,7 @@ namespace GeotabChallengeCC
                                     worker.RequestStop();
                                     cancellationToken.Cancel();
                                 }
-                        
+
                                 Console.WriteLine();
                                 Console.WriteLine("******************************************************");
                                 Console.WriteLine("Finished receiving data from " + server + (federation ? "" : "/" + database));
@@ -101,16 +112,13 @@ namespace GeotabChallengeCC
                 }
             }
             Console.WriteLine("Usage:\n");
-            Console.WriteLine(Command, "server", "database", "user", "password", "nnn", "nnn", "nnn", "nnn", "nnn", "file path");
+            Console.WriteLine(Command, "server", "database", "user", "password", "nnn", "nnn", "file path");
             Console.WriteLine("--s  The Server");
             Console.WriteLine("--d  The Database");
             Console.WriteLine("--u  The User");
             Console.WriteLine("--p  The Password");
             Console.WriteLine("--gt The last known gps data Version");
             Console.WriteLine("--st The last known status data Version");
-            Console.WriteLine("--ft The last known fault data Version");
-            Console.WriteLine("--tt The last known trip Version");
-            Console.WriteLine("--et The last known exception Version");
             Console.WriteLine("--f  The folder to save any output files to, if applicable. Defaults to the current directory.");
             Console.WriteLine("--c  Run the feed continuously.");
             Console.ReadLine();

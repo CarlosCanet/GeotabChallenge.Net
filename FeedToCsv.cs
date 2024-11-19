@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -31,14 +33,17 @@ namespace GeotabChallengeCC
         /// </summary>
         public const string StatusDataHeader = "sVehicle Name,sVehicle Serial Number,sVIN,sDate,sDiagnostic Name,iDiagnostic Code,sSource Name,dValue,sUnits";
 
+
         /// <summary>
         /// The file prefix for status data
         /// </summary>
         public const string StatusPrefix = "Status_Data";
+        public const string BackupDataHeader = "sTimestamp,sEventId,sVehicleName,sVehicleSerialNumber,sVin,dLatitud,dLongitud,iSpeed,iOdometer";
 
         readonly IList<LogRecord> gpsRecords;
         readonly string path;
         readonly IList<StatusData> statusRecords;
+        readonly IDictionary<Id, SortedList<DateTime?,object>> vehicleRecords = new Dictionary<Id, SortedList<DateTime?, object>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedToCsv" /> class.
@@ -46,7 +51,7 @@ namespace GeotabChallengeCC
         /// <param name="path">The path.</param>
         /// <param name="gpsRecords">The GPS records.</param>
         /// <param name="statusRecords">The status records.</param>
-        public FeedToCsv(string path, IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null, IList<FaultData> faultRecords = null, IList<Trip> trips = null, IList<ExceptionEvent> exceptionEvents = null)
+        public FeedToCsv(string path, IList<LogRecord> gpsRecords = null, IList<StatusData> statusRecords = null)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -59,6 +64,24 @@ namespace GeotabChallengeCC
             }
             this.gpsRecords = gpsRecords ?? new List<LogRecord>();
             this.statusRecords = statusRecords ?? new List<StatusData>();
+            foreach (var record in this.gpsRecords)
+            {
+                if (!vehicleRecords.ContainsKey(record.Device.Id))
+                {
+                    vehicleRecords[record.Device.Id] = new SortedList<DateTime?, object>();
+                }
+                vehicleRecords[record.Device.Id].Add(record.DateTime, record);
+            }
+
+            // Agregar StatusData
+            foreach (var status in this.statusRecords)
+            {
+                if (!vehicleRecords.ContainsKey(status.Device.Id))
+                {
+                    vehicleRecords[status.Device.Id] = new SortedList<DateTime?, object>();
+                }
+                vehicleRecords[status.Device.Id].Add(status.DateTime, status);
+            }
         }
 
         /// <summary>
@@ -73,6 +96,10 @@ namespace GeotabChallengeCC
             if (statusRecords.Count > 0)
             {
                 WriteDataToCsv<StatusData>();
+            }
+            if (vehicleRecords.Count > 0)
+            {
+                WriteDataToCsvByVehicle();
             }
         }
 
@@ -187,6 +214,70 @@ namespace GeotabChallengeCC
                 {
                     throw new NotSupportedException(type.ToString());
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                if (e is IOException)
+                {
+                    // Possiable system out of memory exception or file lock. Log then sleep for a minute and continue.
+                    Thread.Sleep(TimeSpan.FromMinutes(1));
+                }
+            }
+        }
+
+        void WriteDataToCsvByVehicle()
+        {
+            try
+            {
+                foreach (var vehicleRecords in vehicleRecords)
+                {
+                    string deviceId = vehicleRecords.Key.ToString();
+                    SortedList<DateTime?,object> records = vehicleRecords.Value;
+                    string filePath = Path.Combine(path, deviceId + ".csv");
+                    bool fileExists = File.Exists(filePath);
+                    using (TextWriter writer = new StreamWriter(filePath, true))
+                    {
+                        if (!fileExists)
+                        {
+                            writer.WriteLine(BackupDataHeader);
+                        }
+                        foreach (var record in records)
+                        {
+                            switch (record.Value)
+                            {
+                                case LogRecord log:
+                                    Write(writer, log, (StringBuilder sb, LogRecord logRecord) =>
+                                    {
+                                        AppendValues(sb, logRecord.DateTime);
+                                        AppendValues(sb, logRecord.Id);
+                                        AppendDeviceValues(sb, logRecord.Device);
+                                        AppendValues(sb, logRecord.Longitude.ToString(CultureInfo.InvariantCulture));
+                                        AppendValues(sb, logRecord.Latitude.ToString(CultureInfo.InvariantCulture));
+                                        AppendValues(sb, logRecord.Speed);
+                                        AppendValues(sb, "-");
+
+                                    });
+                                    break;
+                                case StatusData status:
+                                    Write(writer, status, (StringBuilder sb, StatusData statusData) =>
+                                    {
+                                        AppendValues(sb, statusData.DateTime);
+                                        AppendValues(sb, statusData.Id);
+                                        AppendDeviceValues(sb, statusData.Device);
+                                        AppendValues(sb, "-");
+                                        AppendValues(sb, "-");
+                                        AppendValues(sb, "-");
+                                        AppendValues(sb, statusData.Data);
+                                    });
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                //timestamp,id,vin,lat,lon,speed,odometer
             }
             catch (Exception e)
             {
