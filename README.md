@@ -42,17 +42,19 @@ To execute the application, use the following command:
 
 ### Example usage:
 ```
-> dotnet run --s mypreview.geotab.com --d demo_candidates_net --u carlos@carlosca.net --p JFd3Bz_p4QgLCfYw67JYwxzGRUiYgC_P --gt 0000000000000000 --st 0000000000000000 --f Backup_Files
+> dotnet run --s "my.geotab.com" --d "database" --u "user@email.com" --p "password" --gt 0000000000000000 --st 0000000000000000 --f Backup_Files
 ```
 
 ## CSV Output
 For each vehicle/device in the database, the program generates a dedicated CSV file. Fields without applicable values are represented by a `-` (e.g., odometer value in GPS records or GPS data in status records).
 | # | Field name | Description | Example |
 |---|---|---|---|
-| 1 | Timestamp | The date and time in UTC of the event (GPS postion or odometer reading) | 2024-11-18T22:04:00.000Z |
-| 2 | Event id | The identification value for the event | b108D4A |
-| 3 | Vehicle Identification Number (VIN) | The unique vehicle identification number | 1HTMSTAR0KH0000001 |
-| 4 | Latitude | The coordinate latitude in decimal degrees. | 43.7611504 |
-| 5 | Longitude | The coordinate longitude in decimal degrees. | -79.4690323 |
-| 6 | Vehicle Speed | The speed in km/h. | 51 |
-| 7 | Odometer value | The value of the odometer in m. | 92271900 |
+| 1 | Timestamp | The date and time in UTC of the event (GPS postion or odometer reading) | 18/11/2024 03:03:53 |
+| 2 | Event id | The identification value for the event | b284DA9 |
+| 3 | Vehicle name | The name of vehicle | Demo - 01 |
+| 4 | Vehicle Serial Number | The unique serial number printed on the GO device	 | G90000000001 |
+| 5 | Vehicle Identification Number (VIN) | The unique vehicle identification number | 1HTMSTAR0KH0000001 |
+| 6 | Latitude | The coordinate latitude in decimal degrees. | 43.7611504 |
+| 7 | Longitude | The coordinate longitude in decimal degrees. | -79.4690323 |
+| 8 | Vehicle Speed | The speed in km/h. | 51 |
+| 9 | Odometer value | The value of the odometer in m. | 92271900 |

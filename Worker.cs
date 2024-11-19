@@ -32,8 +32,9 @@ namespace GeotabChallengeCC
             
             // Optionally we can output to csv or google doc:
             new FeedToCsv(path, results.GpsRecords, results.StatusData).Run();
+            Console.WriteLine("Backup done. " + (results.GpsRecords.Count + results.StatusData.Count) + " events processed (" + results.GpsRecords.Count + " GPS events and " + results.StatusData.Count + " status events).");
             // Displays feed to console
-            new FeedToConsole(results.GpsRecords,results.StatusData).Run();
+            // new FeedToConsole(results.GpsRecords,results.StatusData).Run();
                         
             await Task.Delay(1000);
         }

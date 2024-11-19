@@ -66,11 +66,24 @@ namespace GeotabChallengeCC
                                 long? statusToken = indexST >= 0 && indexST < args.Length - 1 ? (long?)long.Parse(args[indexST + 1], System.Globalization.NumberStyles.HexNumber) : null;
                                 if ((indexGT < 0 || indexST < 0) && File.Exists(CONFIG_FILE))
                                 {
-                                    string jsonContent = File.ReadAllText(CONFIG_FILE);
-                                    using JsonDocument document = JsonDocument.Parse(jsonContent);
-                                    JsonElement root = document.RootElement;
-                                    gpsToken = gpsToken ?? root.GetProperty("gpsToken").GetInt64();
-                                    statusToken = statusToken ?? root.GetProperty("statusToken").GetInt64();
+                                    try
+                                    {
+                                        string jsonContent = File.ReadAllText(CONFIG_FILE);
+                                        using JsonDocument document = JsonDocument.Parse(jsonContent);
+                                        JsonElement root = document.RootElement;
+                                        if (gpsToken == null && root.TryGetProperty("gpsToken", out JsonElement gpsTokenElement))
+                                        {
+                                            gpsToken = gpsTokenElement.GetInt64();
+                                        }
+                                        if (statusToken == null && root.TryGetProperty("statusToken", out JsonElement statusTokenElement))
+                                        {
+                                            statusToken = statusTokenElement.GetInt64();
+                                        }
+                                    }
+                                    catch (JsonException ex)
+                                    {
+                                        Console.WriteLine($"Error in JSON config file: {ex.Message}");
+                                    }
                                 }
                                 index = arguments.IndexOf("--f");
                                 string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Environment.CurrentDirectory;

@@ -43,7 +43,7 @@ namespace GeotabChallengeCC
         readonly IList<LogRecord> gpsRecords;
         readonly string path;
         readonly IList<StatusData> statusRecords;
-        readonly IDictionary<Id, SortedList<DateTime?,object>> vehicleRecords = new Dictionary<Id, SortedList<DateTime?, object>>();
+        readonly IDictionary<Id, SortedList<string, object>> vehicleRecords = new Dictionary<Id, SortedList<string, object>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeedToCsv" /> class.
@@ -68,9 +68,9 @@ namespace GeotabChallengeCC
             {
                 if (!vehicleRecords.ContainsKey(record.Device.Id))
                 {
-                    vehicleRecords[record.Device.Id] = new SortedList<DateTime?, object>();
+                    vehicleRecords[record.Device.Id] = new SortedList<string, object>();
                 }
-                vehicleRecords[record.Device.Id].Add(record.DateTime, record);
+                vehicleRecords[record.Device.Id].Add(record.DateTime.ToString() + record.Id, record);
             }
 
             // Agregar StatusData
@@ -78,9 +78,9 @@ namespace GeotabChallengeCC
             {
                 if (!vehicleRecords.ContainsKey(status.Device.Id))
                 {
-                    vehicleRecords[status.Device.Id] = new SortedList<DateTime?, object>();
+                    vehicleRecords[status.Device.Id] = new SortedList<string, object>();
                 }
-                vehicleRecords[status.Device.Id].Add(status.DateTime, status);
+                vehicleRecords[status.Device.Id].Add(status.DateTime.ToString() + status.Id, status);
             }
         }
 
@@ -89,14 +89,14 @@ namespace GeotabChallengeCC
         /// </summary>
         public void Run()
         {
-            if (gpsRecords.Count > 0)
-            {
-                WriteDataToCsv<LogRecord>();
-            }
-            if (statusRecords.Count > 0)
-            {
-                WriteDataToCsv<StatusData>();
-            }
+            // if (gpsRecords.Count > 0)
+            // {
+            //     WriteDataToCsv<LogRecord>();
+            // }
+            // if (statusRecords.Count > 0)
+            // {
+            //     WriteDataToCsv<StatusData>();
+            // }
             if (vehicleRecords.Count > 0)
             {
                 WriteDataToCsvByVehicle();
@@ -233,7 +233,7 @@ namespace GeotabChallengeCC
                 foreach (var vehicleRecords in vehicleRecords)
                 {
                     string deviceId = vehicleRecords.Key.ToString();
-                    SortedList<DateTime?,object> records = vehicleRecords.Value;
+                    SortedList<string, object> records = vehicleRecords.Value;
                     string filePath = Path.Combine(path, deviceId + ".csv");
                     bool fileExists = File.Exists(filePath);
                     using (TextWriter writer = new StreamWriter(filePath, true))
@@ -277,7 +277,6 @@ namespace GeotabChallengeCC
                         }
                     }
                 }
-                //timestamp,id,vin,lat,lon,speed,odometer
             }
             catch (Exception e)
             {
