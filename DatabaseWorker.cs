@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Geotab.Checkmate.ObjectModel;
 
 namespace GeotabChallengeCC
 {
@@ -7,7 +8,7 @@ namespace GeotabChallengeCC
     /// </summary>
     class DatabaseWorker : Worker
     {
-        readonly FeedParameters feedParameters;
+        // readonly FeedParameters feedParameters;
         readonly FeedProcessor feedService;
 
         /// <summary>
@@ -20,13 +21,11 @@ namespace GeotabChallengeCC
         /// <param name="gpsToken">The GPS token.</param>
         /// <param name="statusToken">The status token.</param>
         /// <param name="path">The path.</param>
-        public DatabaseWorker(string user, string password, string database, string server, long? gpsToken, long? statusToken, string path)
-            : base(path)
+        public DatabaseWorker(string user, string password, string database, string server, string path, int backupInterval)
+            : base(path, backupInterval)
         {
-            feedParameters = new FeedParameters(gpsToken, statusToken);
+            // feedParameters = new FeedParameters(gpsToken, statusToken);
             feedService = new FeedProcessor(server, database, user, password);
-            
-
         }
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace GeotabChallengeCC
         /// <inheritdoc />
         public async override Task WorkActionAsync()
         {
-            await DisplayFeedResultsAsync(await feedService.GetAsync(feedParameters));
+            await DisplayFeedResultsAsync(await feedService.GetAsync());
             
         }
     }

@@ -10,6 +10,7 @@ namespace GeotabChallengeCC
     abstract class Worker
     {
         readonly string path;
+        int backupInterval;
         bool stop;
 
         /// <summary>
@@ -18,9 +19,21 @@ namespace GeotabChallengeCC
         /// <param name="path">The path.</param>
         internal Worker(string path)
         {
-            
+
             this.path = path;
-            
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Worker"/> class.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        internal Worker(string path, int backupInterval)
+        {
+
+            this.path = path;
+            this.backupInterval = backupInterval;
+
         }
 
         /// <summary>
@@ -29,14 +42,14 @@ namespace GeotabChallengeCC
         /// <param name="results">The results.</param>
         public async Task DisplayFeedResultsAsync(FeedResultData results)
         {
-            
+
             // Optionally we can output to csv or google doc:
             new FeedToCsv(path, results.GpsRecords, results.StatusData).Run();
             Console.WriteLine("Backup done. " + (results.GpsRecords.Count + results.StatusData.Count) + " events processed (" + results.GpsRecords.Count + " GPS events and " + results.StatusData.Count + " status events).");
             // Displays feed to console
             // new FeedToConsole(results.GpsRecords,results.StatusData).Run();
-                        
-            await Task.Delay(1000);
+
+            await Task.Delay(backupInterval*1000);
         }
 
         /// <summary>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Geotab.Checkmate;
@@ -19,6 +20,7 @@ namespace GeotabChallengeCC
     class FeedProcessor
     {
         const int RepopulatePeroid = 12; // In hours
+        const int HoursToBackup = 12;
         readonly API api;
         IDictionary<Id, Controller> controllerCache;
         IDictionary<Id, Device> deviceCache;
@@ -26,6 +28,7 @@ namespace GeotabChallengeCC
         IDictionary<Id, Driver> driverCache;
         IDictionary<Id, FailureMode> failureModeCache;
         DateTime repopulateCaches = DateTime.MinValue;
+        DateTime lastDate = DateTime.UtcNow.AddHours(-HoursToBackup);
         IDictionary<Id, Rule> ruleCache;
         IDictionary<Id, UnitOfMeasure> unitOfMeasureCache;
 
@@ -55,7 +58,7 @@ namespace GeotabChallengeCC
         /// </summary>
         /// <param name="feedParams">Contains latest data token and collections to populate during this call.</param>
         /// <returns><see cref="FeedResultData"/></returns>
-        public async Task<FeedResultData> GetAsync(FeedParameters feedParams)
+        public async Task<FeedResultData> GetAsync()
         {
             FeedResultData feedResults = new FeedResultData(new List<LogRecord>(), new List<StatusData>());
             try
@@ -65,29 +68,32 @@ namespace GeotabChallengeCC
                     await PopulateCachesAsync();
                     repopulateCaches = DateTime.UtcNow.AddHours(RepopulatePeroid);
                 }
-                FeedResult<LogRecord> feedLogRecordData = await MakeFeedCallAsync<LogRecord>(feedParams.LastGpsDataToken);
-                // FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken);
-                StatusDataSearch statusDataSearch = new() {
-                    DiagnosticSearch = new DiagnosticSearch(KnownId.DiagnosticOdometerId)
+                LogRecordSearch logRecordSearch = new()
+                {
+                    FromDate = lastDate
                 };
-                FeedResult<StatusData> feedStatusData = await MakeFeedCallAsync<StatusData>(feedParams.LastStatusDataToken, statusDataSearch);
-                feedParams.LastGpsDataToken = feedLogRecordData.ToVersion;
-                foreach (LogRecord log in feedLogRecordData.Data)
+                IList<LogRecord> feedLogRecordData = await api.CallAsync<IList<LogRecord>>("Get", typeof(LogRecord), new { search = logRecordSearch });
+                StatusDataSearch statusDataSearch = new()
+                {
+                    DiagnosticSearch = new DiagnosticSearch(KnownId.DiagnosticOdometerId),
+                    FromDate = lastDate
+                };
+                lastDate = DateTime.UtcNow;
+                IList<StatusData> feedStatusData = await api.CallAsync<IList<StatusData>>("Get", typeof(StatusData), new { search = statusDataSearch });
+                foreach (LogRecord log in feedLogRecordData)
                 {
                     // Populate relevant LogRecord fields.
                     log.Device = await GetDeviceAsync(log.Device);
                     feedResults.GpsRecords.Add(log);
                 }
-                feedParams.LastStatusDataToken = feedStatusData.ToVersion;
-                foreach (StatusData log in feedStatusData.Data)
+
+                foreach (StatusData log in feedStatusData)
                 {
                     // Populate relevant StatusData fields.
                     log.Device = await GetDeviceAsync(log.Device);
                     log.Diagnostic = await GetDiagnosticAsync(log.Diagnostic);
                     feedResults.StatusData.Add(log);
                 }
-                var tokens = new { gpsToken = feedParams.LastGpsDataToken, statusToken = feedParams.LastStatusDataToken };
-                await File.WriteAllTextAsync(Program.CONFIG_FILE, JsonSerializer.Serialize(tokens, new JsonSerializerOptions { WriteIndented = true }));
             }
             catch (Exception e)
             {

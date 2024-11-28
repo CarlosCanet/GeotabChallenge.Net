@@ -25,7 +25,7 @@ namespace GeotabChallengeCC
     /// </summary>
     static class Program
     {
-        public readonly static string CONFIG_FILE = "config.json";
+        readonly static int backupInterval = 20;   // In seconds
         /// <summary>
         /// This is a console example of obtaining the data feed from the server.
         /// 1) Process command line arguments: Server, Database, User, Password, Options, File Path and Continuous Feed option.
@@ -36,7 +36,7 @@ namespace GeotabChallengeCC
         /// <param name="args">The command line arguments for the application. Note: When debugging these can be added by: Right click the project &gt; Properties &gt; Debug Tab &gt; Start Options: Command line arguments.</param>
         static void Main(string[] args)
         {
-            const string Command = "> dotnet run --s {0} --d {1} --u {2} --p {3} --gt {4} --st {5} --f {9} --c";
+            const string Command = "> dotnet run --s {0} --d {1} --u {2} --p {3} --f {9} --c";
             if (args.Length > 0)
             {
                 IList<string> arguments = new List<string>();
@@ -60,36 +60,11 @@ namespace GeotabChallengeCC
                             if (index >= 0 && index < args.Length - 1)
                             {
                                 string database = index >= 0 && index < args.Length - 1 ? args[index + 1] : null;
-                                int indexGT = arguments.IndexOf("--gt");
-                                long? gpsToken = indexGT >= 0 && indexGT < args.Length - 1 ? (long?)long.Parse(args[indexGT + 1], System.Globalization.NumberStyles.HexNumber) : null;
-                                int indexST = arguments.IndexOf("--st");
-                                long? statusToken = indexST >= 0 && indexST < args.Length - 1 ? (long?)long.Parse(args[indexST + 1], System.Globalization.NumberStyles.HexNumber) : null;
-                                if ((indexGT < 0 || indexST < 0) && File.Exists(CONFIG_FILE))
-                                {
-                                    try
-                                    {
-                                        string jsonContent = File.ReadAllText(CONFIG_FILE);
-                                        using JsonDocument document = JsonDocument.Parse(jsonContent);
-                                        JsonElement root = document.RootElement;
-                                        if (gpsToken == null && root.TryGetProperty("gpsToken", out JsonElement gpsTokenElement))
-                                        {
-                                            gpsToken = gpsTokenElement.GetInt64();
-                                        }
-                                        if (statusToken == null && root.TryGetProperty("statusToken", out JsonElement statusTokenElement))
-                                        {
-                                            statusToken = statusTokenElement.GetInt64();
-                                        }
-                                    }
-                                    catch (JsonException ex)
-                                    {
-                                        Console.WriteLine($"Error in JSON config file: {ex.Message}");
-                                    }
-                                }
                                 index = arguments.IndexOf("--f");
                                 string path = index >= 0 && index < args.Length - 1 ? args[index + 1] : Environment.CurrentDirectory;
                                 bool continuous = arguments.IndexOf("--c") >= 0;
                                 bool federation = string.IsNullOrEmpty(database);
-                                Worker worker = new DatabaseWorker(user, password, database, server, gpsToken, statusToken, path);
+                                Worker worker = new DatabaseWorker(user, password, database, server, path, backupInterval);
                                 var cancellationToken = new CancellationTokenSource();
                                 Task[] tasks = new Task[1];
                                 // tasks[0] = Task.Run(async () => await worker.DoWorkAsync(continuous));

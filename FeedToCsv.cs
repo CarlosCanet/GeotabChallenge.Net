@@ -226,6 +226,45 @@ namespace GeotabChallengeCC
             }
         }
 
+        string ReadLastLine(string filePath, Encoding encoding = null)
+        {
+            encoding ??= Encoding.UTF8; // Usa UTF-8 como predeterminado si no se proporciona codificación
+
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                long fileSize = fs.Length;
+
+                // Manejar archivos vacíos
+                if (fileSize == 0)
+                    return null;
+
+                long position = fileSize - 1; // Comienza al final del archivo
+                int bufferSize = 1; // Leer de a un byte
+                byte[] buffer = new byte[bufferSize];
+                StringBuilder lineBuilder = new StringBuilder();
+
+                // Leer hacia atrás hasta encontrar un salto de línea
+                while (position >= 0)
+                {
+                    fs.Seek(position, SeekOrigin.Begin);
+                    fs.Read(buffer, 0, bufferSize);
+
+                    // Si encontramos un salto de línea, terminamos la búsqueda
+                    if (buffer[0] == '\n' && lineBuilder.Length > 0)
+                    {
+                        break;
+                    }
+
+                    // Agregar el carácter al inicio del StringBuilder
+                    lineBuilder.Insert(0, encoding.GetString(buffer));
+
+                    position--;
+                }
+
+                return lineBuilder.ToString().TrimEnd('\r', '\n'); // Remover caracteres de salto de línea
+            }
+        }
+
         void WriteDataToCsvByVehicle()
         {
             try
@@ -236,44 +275,60 @@ namespace GeotabChallengeCC
                     SortedList<string, object> records = vehicleRecords.Value;
                     string filePath = Path.Combine(path, deviceId + ".csv");
                     bool fileExists = File.Exists(filePath);
+                    DateTime lastDate = DateTime.MinValue;
                     using (TextWriter writer = new StreamWriter(filePath, true))
                     {
                         if (!fileExists)
                         {
                             writer.WriteLine(BackupDataHeader);
                         }
+                        else
+                        {
+                            string lastLine = ReadLastLine(filePath);
+                            if (!string.IsNullOrWhiteSpace(lastLine))
+                            {
+                                DateTime.TryParse(lastLine.Split(",")[0], out lastDate);
+                            }
+                        }
                         foreach (var record in records)
                         {
                             switch (record.Value)
                             {
                                 case LogRecord log:
-                                    Write(writer, log, (StringBuilder sb, LogRecord logRecord) =>
+                                    if (log.DateTime > lastDate)
                                     {
-                                        AppendValues(sb, logRecord.DateTime);
-                                        AppendValues(sb, logRecord.Id);
-                                        AppendDeviceValues(sb, logRecord.Device);
-                                        AppendValues(sb, logRecord.Longitude.ToString(CultureInfo.InvariantCulture));
-                                        AppendValues(sb, logRecord.Latitude.ToString(CultureInfo.InvariantCulture));
-                                        AppendValues(sb, logRecord.Speed);
-                                        AppendValues(sb, "-");
+                                        Write(writer, log, (StringBuilder sb, LogRecord logRecord) =>
+                                        {
+                                            AppendValues(sb, logRecord.DateTime);
+                                            AppendValues(sb, logRecord.Id);
+                                            AppendDeviceValues(sb, logRecord.Device);
+                                            AppendValues(sb, logRecord.Longitude.ToString(CultureInfo.InvariantCulture));
+                                            AppendValues(sb, logRecord.Latitude.ToString(CultureInfo.InvariantCulture));
+                                            AppendValues(sb, logRecord.Speed);
+                                            AppendValues(sb, "-");
 
-                                    });
+                                        });
+                                    }
                                     break;
                                 case StatusData status:
-                                    Write(writer, status, (StringBuilder sb, StatusData statusData) =>
+                                    if (status.DateTime > lastDate)
                                     {
-                                        AppendValues(sb, statusData.DateTime);
-                                        AppendValues(sb, statusData.Id);
-                                        AppendDeviceValues(sb, statusData.Device);
-                                        AppendValues(sb, "-");
-                                        AppendValues(sb, "-");
-                                        AppendValues(sb, "-");
-                                        AppendValues(sb, statusData.Data);
-                                    });
+                                        Write(writer, status, (StringBuilder sb, StatusData statusData) =>
+                                        {
+                                            AppendValues(sb, statusData.DateTime);
+                                            AppendValues(sb, statusData.Id);
+                                            AppendDeviceValues(sb, statusData.Device);
+                                            AppendValues(sb, "-");
+                                            AppendValues(sb, "-");
+                                            AppendValues(sb, "-");
+                                            AppendValues(sb, statusData.Data);
+                                        });
+                                    }
                                     break;
                                 default:
                                     break;
                             }
+
                         }
                     }
                 }
